@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LYES SHOP - Premium E-Commerce Experience</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --primary: #1f3d8f;
+      --secondary: #2d9cdb;
+      --text: #1f2937;
+      --muted: #64748b;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: rgba(148, 163, 184, 0.2);
+      --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      --radius: 24px;
+    }
+    .dark {
+      --bg: #0f172a;
+      --surface: #111827;
+      --primary: #60a5fa;
+      --secondary: #38bdf8;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.16);
+      --shadow: 0 20px 45px rgba(3, 7, 18, 0.55);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top left, rgba(45, 156, 219, 0.14), transparent 25%), var(--bg);
+      color: var(--text);
+    }
+    img { max-width: 100%; display: block; }
+    button, input, textarea, select { font: inherit; }
+    .hidden { display: none !important; }
+    .loader-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      transition: opacity .4s ease;
+    }
+    .loader-screen.hide { opacity: 0; pointer-events: none; }
+    .loader-dot {
+      width: 16px; height: 16px; margin: 0 6px; border-radius: 50%;
+      background: var(--primary); animation: bounce 0.8s infinite ease-in-out;
+    }
+    .loader-dot:nth-child(2) { animation-delay: 0.15s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+    .toast {
+      position: fixed; right: 20px; top: 20px; z-index: 10000;
+      padding: 14px 18px; border-radius: 14px; background: rgba(15,23,42,.94);
+      color: #f8fafc; box-shadow: var(--shadow); opacity: 0; transform: translateY(-10px);
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .app-shell { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 280px; background: rgba(255,255,255,.92); border-right: 1px solid var(--border);
+      padding: 28px 24px; display: flex; flex-direction: column; gap: 18px;
+      position: sticky; top: 0; height: 100vh;
+    }
+    .sidebar h1 { font-size: 1.35rem; margin: 0; letter-spacing: -0.02em; }
+    .sidebar p { margin: 0; color: var(--muted); }
+    .nav-link, .tab-button { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-decoration: none; color: var(--text); padding: 14px 16px; border-radius: 16px; transition: background .2s ease, transform .2s ease; }
+    .nav-link:hover, .tab-button:hover { background: rgba(56, 189, 248, .12); transform: translateX(2px); }
+    .nav-link.active { background: rgba(56, 189, 248, .18); }
+    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 18px; }
+    .section-title h2 { margin: 0; font-size: 1.25rem; }
+    .button, button {
+      border: none; cursor: pointer; border-radius: 999px; padding: 12px 22px;
+      background: var(--primary); color: white; box-shadow: var(--shadow); transition: transform .2s ease, background .2s ease;
+    }
+    .button:hover, button:hover { transform: translateY(-1px); background: var(--secondary); }
+    .hero { padding: 44px 0 20px; }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 28px; align-items: center; }
+    .hero-card { background: var(--surface); padding: 32px; border-radius: var(--radius); box-shadow: var(--shadow); }
+    .hero-card h1 { margin: 0 0 16px; font-size: clamp(2rem, 4vw, 3.6rem); line-height: 1.05; }
+    .hero-card p { margin: 0 0 24px; color: var(--muted); max-width: 520px; }
+    .hero-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-stat { background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.18); padding: 18px 20px; border-radius: 18px; min-width: 150px; }
+    .hero-stat strong { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+    .banner-panel { display: grid; gap: 18px; margin-top: 20px; }
+    .banner-large { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: var(--radius); min-height: 260px; display: grid; place-items: center; padding: 32px; }
+    .banner-large h3 { margin: 0 0 12px; font-size: 1.75rem; }
+    .banner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .card-list { display: grid; gap: 20px; }
+    .product-card {
+      background: var(--surface); border-radius: 28px; padding: 18px; box-shadow: var(--shadow); transition: transform .2s ease;
+    }
+    .product-card:hover { transform: translateY(-4px); }
+    .product-card img { border-radius: 22px; width: 100%; object-fit: cover; aspect-ratio: 4 / 3; }
+    .product-card h3 { margin: 14px 0 8px; font-size: 1.1rem; }
+    .product-card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+    .product-price { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .rating { display: inline-flex; align-items: center; gap: 6px; color: #f59e0b; font-size: 0.95rem; }
+    .category-pill { display: inline-flex; gap: 6px; padding: 8px 12px; border-radius: 999px; background: rgba(56,189,248,.12); color: var(--primary); font-size: 0.84rem; }
+    .grid-3 { display: grid; gap: 20px; grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .grid-2 { display: grid; gap: 20px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .topbar {
+      width: 100%; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.92); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border);
+    }
+    .topbar h2 { margin: 0; font-size: 1.1rem; }
+    .topbar-actions { display: flex; gap: 12px; align-items: center; }
+    .topbar-actions button { background: rgba(31, 61, 143, 0.08); color: var(--text); padding: 11px 16px; border-radius: 999px; }
+    .topbar-actions button:hover { background: rgba(31, 61, 143, 0.14); }
+    .search-bar { background: var(--surface); padding: 18px 20px; border-radius: 22px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow); }
+    .search-bar input {
+      border: 1px solid var(--border); padding: 14px 16px; border-radius: 16px; width: 100%; background: transparent;
+    }
+    .search-bar button { background: var(--primary); }
+    .cards-row { display: grid; grid-template-columns: 1.4fr .6fr; gap: 24px; }
+    .panel { background: var(--surface); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); }
+    .panel h3 { margin: 0 0 16px; }
+    .panel .panel-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .panel .panel-item:last-child { border-bottom: none; }
+    .panel .panel-item strong { color: var(--text); }
+    .cart-list { display: grid; gap: 18px; }
+    .cart-item { display: grid; grid-template-columns: 88px 1fr; gap: 18px; align-items: center; }
+    .cart-item img { border-radius: 20px; width: 100%; height: 88px; object-fit: cover; }
+    .cart-item-details { display: grid; gap: 6px; }
+    .cart-item-details button { background: transparent; color: var(--danger); padding: 0; box-shadow: none; }
+    .checkout-card { display: grid; gap: 14px; }
+    .checkout-card input, .checkout-card textarea, .checkout-card select {
+      width: 100%; border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; background: transparent; color: var(--text);
+    }
+    .footer { padding: 40px 24px; display: grid; gap: 24px; background: rgba(15, 23, 42, 0.05); margin-top: 28px; }
+    .footer-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 24px; }
+    .footer h4 { margin: 0 0 14px; }
+    .footer a { color: var(--text); text-decoration: none; display: block; margin: 8px 0; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(34,197,94,.12); color: var(--success); font-size: 0.84rem; }
+    .alert { display: inline-flex; padding: 10px 14px; border-radius: 16px; background: rgba(15,23,42,.06); color: var(--text); }
+    .admin-panel { display: grid; gap: 24px; }
+    .admin-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+    .admin-tab { border: 1px solid var(--border); background: var(--surface); padding: 14px 16px; border-radius: 16px; cursor: pointer; text-align: center; }
+    .admin-tab.active { border-color: var(--primary); color: var(--primary); background: rgba(56,189,248,.12); }
+    .form-grid { display: grid; gap: 18px; }
+    .form-row { display: grid; gap: 14px; }
+    .form-row label { font-size: 0.95rem; color: var(--muted); }
+    .form-row input, .form-row textarea, .form-row select { width: 100%; border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; background: transparent; color: var(--text); }
+    .status-pill { display: inline-flex; align-items: center; justify-content: center; padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; background: rgba(34,197,94,0.14); color: #166534; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { text-align: left; padding: 14px 12px; border-bottom: 1px solid var(--border); }
+    .table th { color: var(--muted); font-weight: 600; }
+    .admin-card { background: var(--surface); padding: 20px; border-radius: 24px; box-shadow: var(--shadow); }
+    .admin-row { display: grid; gap: 18px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .admin-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .settings-grid { display: grid; gap: 18px; }
+    .profile-banner { display: grid; gap: 10px; }
+    .profile-banner input { width: auto; }
+    .hero-image-block { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 380px; display: grid; place-items: center; }
+    .hero-image-block:before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(56,189,248,.18), transparent 24%), radial-gradient(circle at 80% 20%, rgba(99,102,241,.18), transparent 24%);
+    }
+    .hero-image-block img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+    .category-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; }
+    .category-card { display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 24px; background: var(--surface); box-shadow: var(--shadow); min-height: 180px; }
+    .category-card h3 { margin: 0; }
+    .footer .social-links { display: flex; gap: 12px; align-items: center; }
+    .social-link { width: 44px; height: 44px; display: grid; place-items: center; background: rgba(56,189,248,.12); border-radius: 14px; color: var(--primary); text-decoration: none; }
+    .form-grid .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .hero-grid, .cards-row, .footer-grid, .category-grid, .grid-3, .grid-2, .admin-row { transition: all .2s ease; }
+    .product-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill { display: inline-flex; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(59,130,246,.12); color: var(--primary); font-size: 0.83rem; }
+    .notification-bar { position: fixed; top: 84px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,.92); color: white; padding: 12px 18px; border-radius: 16px; display: none; z-index: 1000; }
+    .notification-bar.active { display: block; }
+    @media (max-width: 1080px) {
+      .app-shell { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .hero-grid, .cards-row, .footer-grid, .category-grid, .grid-3, .grid-2, .admin-row { grid-template-columns: 1fr; }
+      .cards-row { gap: 18px; }
+      .hero-card { padding: 28px; }
+      .banner-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .topbar, .sidebar { padding: 16px; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+      .hero-card, .banner-large, .product-card, .panel, .admin-card { border-radius: 20px; }
+      .search-bar { flex-direction: column; align-items: stretch; }
+      .topbar-actions { flex-wrap: wrap; }
+      .admin-tabs { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loader" class="loader-screen">
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <div class="topbar">
+    <div>
+      <strong>LYES SHOP</strong>
+      <span style="margin-left:12px;color:var(--muted);">Premium commerce experience</span>
+    </div>
+    <div class="topbar-actions">
+      <button onclick="navigate('home')">Home</button>
+      <button onclick="navigate('contact')">Contact</button>
+      <button onclick="navigate('admin')">Admin</button>
+      <button id="themeToggle" onclick="toggleTheme()">Dark mode</button>
+    </div>
+  </div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>LYES SHOP</h1>
+      <p>Modern online store interface for customers and administrator.</p>
+      <a class="nav-link active" href="javascript:navigate('home')">Explore store</a>
+      <a class="nav-link" href="javascript:navigate('shop')">Products</a>
+      <a class="nav-link" href="javascript:navigate('categories')">Categories</a>
+      <a class="nav-link" href="javascript:navigate('contact')">Contact</a>
+      <a class="nav-link" href="javascript:navigate('admin')">Admin login</a>
+      <div class="section-title"><h2>Quick info</h2></div>
+      <div class="alert">Secure admin panel with local configuration in one file.</div>
+      <div class="alert">Cart and checkout ready for easy upgrade.</div>
+    </aside>
+    <main id="mainContent" style="flex:1; padding: 28px;">
+      <section id="homePage">
+        <div class="hero">
+          <div class="hero-grid">
+            <div class="hero-card">
+              <p class="badge">Most trusted online destination</p>
+              <h1>Visit LYES SHOP for elegant, premium products with a smooth shopping experience.</h1>
+              <p>Shop top trends, explore new arrivals, and complete secure checkout with a fast responsive interface built for modern businesses.</p>
+              <div class="hero-stats">
+                <div class="hero-stat"><strong>300+</strong> products available</div>
+                <div class="hero-stat"><strong>4.9/5</strong> average rating</div>
+                <div class="hero-stat"><strong>99%</strong> happy customer rate</div>
+              </div>
+            </div>
+            <div class="hero-image-block">
+              <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=900&q=80" alt="LYES SHOP featured" />
+            </div>
+          </div>
+        </div>
+        <div class="search-bar" style="margin-top: 28px;">
+          <input id="searchInput" type="search" placeholder="Search new arrivals, categories, brands..." oninput="renderProducts()" />
+          <button onclick="renderProducts()">Search</button>
+        </div>
+        <div class="section-title" style="margin-top: 28px;">
+          <h2>New products</h2>
+          <span style="color: var(--muted);">Fresh drops curated for your store.</span>
+        </div>
+        <div id="productsGrid" class="grid-3"></div>
+        <div class="section-title" style="margin-top: 40px;">
+          <h2>Best sellers</h2>
+          <span style="color: var(--muted);">Customer favorites and top-rated items.</span>
+        </div>
+        <div id="bestSellersGrid" class="grid-3"></div>
+        <div class="section-title" style="margin-top: 40px;">
+          <h2>Shop by category</h2>
+          <span style="color: var(--muted);">Organized browsing for easy discovery.</span>
+        </div>
+        <div class="category-grid" id="categoryGrid"></div>
+        <div class="cards-row" style="margin-top: 40px;">
+          <div class="panel">
+            <h3>Shopping cart</h3>
+            <div id="cartList" class="cart-list"></div>
+            <div class="admin-actions" style="justify-content: space-between; padding-top: 16px;">
+              <strong id="cartTotal">Total: $0</strong>
+              <button onclick="navigate('checkout')">Proceed to Checkout</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Featured categories</h3>
+            <div class="pill">Newest arrivals</div>
+            <div class="pill">Premium electronics</div>
+            <div class="pill">Fast shipping</div>
+            <div class="pill">Verified sellers</div>
+          </div>
+        </div>
+      </section>
+      <section id="shopPage" class="hidden">
+        <div class="section-title"><h2>Product catalog</h2></div>
+        <div class="grid-3" id="productList"></div>
+      </section>
+      <section id="categoriesPage" class="hidden">
+        <div class="section-title"><h2>Categories</h2></div>
+        <div class="category-grid" id="categoryList"></div>
+      </section>
+      <section id="contactPage" class="hidden">
+        <div class="section-title"><h2>Contact & support</h2></div>
+        <div class="cards-row">
+          <div class="panel">
+            <h3>Send us a message</h3>
+            <div class="form-grid">
+              <div class="form-row"><label>Name</label><input id="contactName" placeholder="Your name" /></div>
+              <div class="form-row"><label>Email</label><input id="contactEmail" type="email" placeholder="you@example.com" /></div>
+              <div class="form-row" style="grid-column: 1 / -1;"><label>Message</label><textarea id="contactMessage" rows="6" placeholder="How can we help you?"></textarea></div>
+              <button onclick="sendContact()">Send message</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Store information</h3>
+            <p>LYES SHOP is a premium shopping experience built for modern stores. Manage products, orders and homepage content from the admin dashboard.</p>
+            <div class="footer">
+              <div><strong>Email</strong><a href="mailto:support@lyesshop.com">support@lyesshop.com</a></div>
+              <div><strong>Phone</strong><a href="tel:+1234567890">+1 (234) 567-890</a></div>
+              <div><strong>Follow</strong><div class="social-links"><a class="social-link" href="#">F</a><a class="social-link" href="#">I</a><a class="social-link" href="#">T</a></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="checkoutPage" class="hidden">
+        <div class="section-title"><h2>Checkout</h2></div>
+        <div class="cards-row">
+          <div class="panel checkout-card">
+            <h3>Billing details</h3>
+            <input id="checkoutName" placeholder="Full name" />
+            <input id="checkoutEmail" type="email" placeholder="Email address" />
+            <input id="checkoutAddress" placeholder="Shipping address" />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"><input id="checkoutCity" placeholder="City" /><input id="checkoutPostal" placeholder="Postal code" /></div>
+            <select id="checkoutPayment">
+              <option value="card">Credit/Debit card</option>
+              <option value="paypal">PayPal</option>
+              <option value="bank">Bank transfer</option>
+            </select>
+            <button onclick="completeCheckout()">Complete purchase</button>
+          </div>
+          <div class="panel">
+            <h3>Your order</h3>
+            <div id="checkoutSummary"></div>
+            <div style="margin-top:16px; font-weight:700;">Total <span id="checkoutAmount">$0</span></div>
+          </div>
+        </div>
+      </section>
+      <section id="adminPage" class="hidden">
+        <div id="adminLoginCard" class="admin-card">
+          <div class="section-title"><h2>Admin login</h2></div>
+          <p>Secure access for store management. Username: <strong>admin</strong>, password: <strong>LYES2026</strong></p>
+          <div class="form-grid">
+            <div class="form-row"><label>Username</label><input id="adminUsername" placeholder="Admin username" /></div>
+            <div class="form-row"><label>Password</label><input id="adminPassword" type="password" placeholder="Admin password" /></div>
+            <button onclick="adminLogin()">Sign in</button>
+          </div>
+        </div>
+        <div id="adminDashboard" class="hidden">
+          <div class="section-title"><h2>Admin dashboard</h2><button onclick="adminLogout()">Logout</button></div>
+          <div class="admin-tabs" id="adminTabs"></div>
+          <div id="adminSections" class="admin-panel"></div>
+        </div>
+      </section>
+      <section id="instructionsPage" class="hidden">
+        <div class="section-title"><h2>How to use LYES SHOP locally</h2></div>
+        <div class="panel">
+          <h3>Start the website</h3>
+          <p>Open this HTML file in your browser or host it with a local server (for example Live Server or Python's <code>python -m http.server</code>).</p>
+        </div>
+        <div class="panel">
+          <h3>Access the admin page</h3>
+          <p>Use the navigation button "Admin" or the admin link in the sidebar. Login with username <strong>admin</strong> and password <strong>LYES2026</strong>.</p>
+        </div>
+        <div class="panel">
+          <h3>Add products</h3>
+          <p>Inside the admin dashboard, go to Products. Use the product form to add title, category, price, stock, description and image. Save to update the public store instantly.</p>
+        </div>
+        <div class="panel">
+          <h3>Publish online</h3>
+          <p>Upload this file to any static hosting service such as GitHub Pages, Netlify, Vercel or your web host. The site will run immediately without extra configuration.</p>
+        </div>
+        <div class="panel">
+          <h3>Share public link</h3>
+          <p>After hosting online, copy the website URL and send it to your visitors. Customers can browse products, use the cart, and submit orders.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <h4>LYES SHOP</h4>
+        <p>A premium e-commerce interface built for modern selling. Manage the store from a secure dashboard.</p>
+      </div>
+      <div>
+        <h4>Quick links</h4>
+        <a href="javascript:navigate('home')">Home</a>
+        <a href="javascript:navigate('shop')">Products</a>
+        <a href="javascript:navigate('contact')">Contact</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a href="mailto:support@lyesshop.com">support@lyesshop.com</a>
+        <a href="javascript:navigate('admin')">Admin login</a>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="social-links"><a class="social-link" href="#">F</a><a class="social-link" href="#">I</a><a class="social-link" href="#">T</a></div>
+      </div>
+    </div>
+  </footer>
+  <script>
+    const STORAGE_KEYS = {
+      products: 'lyes-shop-products',
+      settings: 'lyes-shop-settings',
+      orders: 'lyes-shop-orders',
+      cart: 'lyes-shop-cart',
+      admin: 'lyes-shop-admin',
+      theme: 'lyes-shop-theme'
+    };
+    const defaultSettings = {
+      siteName: 'LYES SHOP',
+      logoText: 'LYES SHOP',
+      primaryColor: '#1f3d8f',
+      secondaryColor: '#2d9cdb',
+      heroBanner: 'Discover premium products in an elegant shopping destination.',
+      contactEmail: 'support@lyesshop.com',
+      contactPhone: '+1 (234) 567-890',
+      social: { facebook: '#', instagram: '#', twitter: '#' },
+      banners: [
+        { title: 'Seasonal promotions', description: 'Refresh your cart with premium items.', badge: 'New' },
+        { title: 'Fast delivery', description: 'Reliable shipping for every order.', badge: 'Top seller' }
+      ]
+    };
+    const defaultProducts = [
+      { id: 'p1', title: 'Modern Leather Backpack', category: 'Accessories', price: 129, description: 'Premium leather backpack for every day.', stock: 15, image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=900&q=80', rating: 4.7, new: true, bestSeller: true },
+      { id: 'p2', title: 'Wireless Noise-Canceling Headphones', category: 'Electronics', price: 219, description: 'Immerse yourself in crisp, powerful sound.', stock: 22, image: 'https://images.unsplash.com/photo-1518449032870-a4c930b7708f?auto=format&fit=crop&w=900&q=80', rating: 4.9, new: true, bestSeller: true },
+      { id: 'p3', title: 'Sleek Smartwatch', category: 'Wearables', price: 179, description: 'Track health and notifications with style.', stock: 10, image: 'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=900&q=80', rating: 4.6, new: false, bestSeller: true },
+      { id: 'p4', title: 'Designer Sunglasses', category: 'Accessories', price: 89, description: 'Stylish protection for sunny days.', stock: 30, image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=900&q=80', rating: 4.8, new: true, bestSeller: false },
+      { id: 'p5', title: 'Premium Office Chair', category: 'Furniture', price: 339, description: 'Comfortable support for long working hours.', stock: 8, image: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=900&q=80', rating: 4.5, new: false, bestSeller: true },
+      { id: 'p6', title: 'Compact Bluetooth Speaker', category: 'Electronics', price: 69, description: 'Rich sound in a pocket-ready design.', stock: 18, image: 'https://images.unsplash.com/photo-1512466413671-72f1a76564cc?auto=format&fit=crop&w=900&q=80', rating: 4.7, new: true, bestSeller: false }
+    ];
+    let appState = {
+      products: [],
+      settings: {},
+      orders: [],
+      cart: {},
+      adminLoggedIn: false,
+      activeAdminTab: 'products'
+    };
+    const passwordHash = 'LYES2026';
+    const sectionIds = ['home', 'shop', 'categories', 'contact', 'checkout', 'admin', 'instructions'];
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    function navigate(section) {
+      sectionIds.forEach(id => document.getElementById(id + 'Page').classList.add('hidden'));
+      document.getElementById(section + 'Page').classList.remove('hidden');
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      const navMap = {home:'Explore store', shop:'Products', categories:'Categories', contact:'Contact', admin:'Admin login'};
+      document.querySelectorAll('.nav-link').forEach(link => { if(link.textContent.trim() === navMap[section]) link.classList.add('active'); });
+      if (section === 'admin') renderAdmin();
+    }
+    function loadLocalData() {
+      const savedProducts = JSON.parse(localStorage.getItem(STORAGE_KEYS.products) || 'null');
+      const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || 'null');
+      const savedOrders = JSON.parse(localStorage.getItem(STORAGE_KEYS.orders) || 'null');
+      const savedCart = JSON.parse(localStorage.getItem(STORAGE_KEYS.cart) || '{}');
+      appState.products = savedProducts && savedProducts.length ? savedProducts : defaultProducts;
+      appState.settings = savedSettings || defaultSettings;
+      appState.orders = savedOrders || [];
+      appState.cart = savedCart;
+      appState.adminLoggedIn = localStorage.getItem(STORAGE_KEYS.admin) === 'true';
+      const theme = localStorage.getItem(STORAGE_KEYS.theme) || 'light';
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      document.getElementById('themeToggle').textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    }
+    function saveLocalData() {
+      localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(appState.products));
+      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(appState.settings));
+      localStorage.setItem(STORAGE_KEYS.orders, JSON.stringify(appState.orders));
+      localStorage.setItem(STORAGE_KEYS.cart, JSON.stringify(appState.cart));
+    }
+    function renderProducts() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = appState.products.filter(product => product.title.toLowerCase().includes(query) || product.category.toLowerCase().includes(query));
+      const container = document.getElementById('productsGrid');
+      container.innerHTML = filtered.map(productCardTemplate).join('');
+      document.getElementById('productList').innerHTML = appState.products.map(productCardTemplate).join('');
+      document.getElementById('bestSellersGrid').innerHTML = appState.products.filter(item => item.bestSeller).map(productCardTemplate).join('');
+      document.getElementById('categoryGrid').innerHTML = uniqueCategories().map(categoryCardTemplate).join('');
+      document.getElementById('categoryList').innerHTML = uniqueCategories().map(categoryCardTemplate).join('');
+      updateCartPanel();
+    }
+    function productCardTemplate(product) {
+      return `<div class="product-card">
+        <img src="${product.image}" alt="${product.title}" />
+        <div class="category-pill">${product.category}</div>
+        <h3>${product.title}</h3>
+        <p>${product.description}</p>
+        <div class="product-price"><strong>$${product.price.toFixed(2)}</strong><span class="rating">★ ${product.rating}</span></div>
+        <div class="product-actions" style="margin-top:14px;"><button class="button" onclick="addToCart('${product.id}')">Add to cart</button><button class="button" style="background:#64748b" onclick="viewProduct('${product.id}')">View</button></div>
+      </div>`;
+    }
+    function uniqueCategories() {
+      return [...new Set(appState.products.map(item => item.category))].map(category => ({ category }));
+    }
+    function categoryCardTemplate(item) {
+      return `<div class="category-card"><div><h3>${item.category}</h3><p>Explore premium products and curated selections in this category.</p></div><button class="button" onclick="filterCategory('${item.category}')">Browse</button></div>`;
+    }
+    function filterCategory(category) {
+      document.getElementById('searchInput').value = category;
+      renderProducts();
+      navigate('shop');
+      showToast(`Filtering by ${category}`);
+    }
+    function addToCart(productId) {
+      appState.cart[productId] = (appState.cart[productId] || 0) + 1;
+      saveLocalData();
+      updateCartPanel();
+      showToast('Product added to cart');
+    }
+    function updateCartPanel() {
+      const cartList = document.getElementById('cartList');
+      const cartItems = Object.keys(appState.cart).map(id => {
+        const product = appState.products.find(item => item.id === id);
+        return { product, qty: appState.cart[id] };
+      });
+      let total = 0;
+      cartList.innerHTML = cartItems.length ? cartItems.map(item => {
+        const itemTotal = item.product.price * item.qty;
+        total += itemTotal;
+        return `<div class="cart-item"><img src="${item.product.image}" alt="${item.product.title}" /><div class="cart-item-details"><strong>${item.product.title}</strong><span>${item.qty} × $${item.product.price.toFixed(2)}</span><button onclick="removeCartItem('${item.product.id}')">Remove</button></div></div>`;
+      }).join('') : '<p style="color:var(--muted)">Your cart is empty. Start shopping now.</p>';
+      document.getElementById('cartTotal').textContent = `Total: $${total.toFixed(2)}`;
+      document.getElementById('checkoutSummary').innerHTML = cartItems.length ? cartItems.map(item => `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span>${item.product.title} x${item.qty}</span><strong>$${(item.product.price * item.qty).toFixed(2)}</strong></div>`).join('') : '<p style="color:var(--muted)">Add items to your cart to see the summary.</p>';
+      document.getElementById('checkoutAmount').textContent = `$${total.toFixed(2)}`;
+    }
+    function removeCartItem(productId) {
+      delete appState.cart[productId];
+      saveLocalData();
+      updateCartPanel();
+      showToast('Product removed from cart');
+    }
+    function viewProduct(id) {
+      const product = appState.products.find(item => item.id === id);
+      if (!product) return;
+      const popup = window.open('', '_blank', 'width=800,height=700');
+      popup.document.write(`<html><head><title>${product.title}</title><style>body{font-family:Inter,sans-serif;padding:24px;background:#f3f4f6;color:#111;}img{max-width:100%;border-radius:20px;}button{padding:12px 18px;border:none;border-radius:12px;background:#1f3d8f;color:#fff;cursor:pointer;}</style></head><body><h1>${product.title}</h1><img src="${product.image}" alt="${product.title}"><p>${product.description}</p><p><strong>Category:</strong> ${product.category}</p><p><strong>Price:</strong> $${product.price.toFixed(2)}</p><p><strong>Stock:</strong> ${product.stock}</p><button onclick="window.close()">Close</button></body></html>`);
+    }
+    function adminLogin() {
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+      if (username === 'admin' && password === passwordHash) {
+        appState.adminLoggedIn = true;
+        localStorage.setItem(STORAGE_KEYS.admin, 'true');
+        renderAdmin();
+        showToast('Admin login successful');
+      } else {
+        showToast('Invalid credentials');
+      }
+    }
+    function adminLogout() {
+      appState.adminLoggedIn = false;
+      localStorage.removeItem(STORAGE_KEYS.admin);
+      renderAdmin();
+      showToast('Logged out');
+    }
+    function renderAdmin() {
+      const loginCard = document.getElementById('adminLoginCard');
+      const dashboard = document.getElementById('adminDashboard');
+      if (!appState.adminLoggedIn) {
+        loginCard.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        return;
+      }
+      loginCard.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      const tabs = [
+        { id: 'products', title: 'Products' },
+        { id: 'orders', title: 'Orders' },
+        { id: 'settings', title: 'Store settings' }
+      ];
+      document.getElementById('adminTabs').innerHTML = tabs.map(tab => `<div class="admin-tab ${appState.activeAdminTab === tab.id ? 'active' : ''}" onclick="setAdminTab('${tab.id}')">${tab.title}</div>`).join('');
+      renderAdminSection();
+    }
+    function setAdminTab(tab) {
+      appState.activeAdminTab = tab;
+      renderAdmin();
+    }
+    function renderAdminSection() {
+      const container = document.getElementById('adminSections');
+      if (appState.activeAdminTab === 'products') {
+        container.innerHTML = adminProductsTemplate();
+      } else if (appState.activeAdminTab === 'orders') {
+        container.innerHTML = adminOrdersTemplate();
+      } else if (appState.activeAdminTab === 'settings') {
+        container.innerHTML = adminSettingsTemplate();
+      }
+    }
+    function adminProductsTemplate() {
+      return `<div class="admin-card"><h3>Manage products</h3><div class="admin-actions"><button onclick="openProductForm()">Add product</button><button onclick="renderProducts()">Refresh store</button></div></div>
+        <div class="admin-card"><table class="table"><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>${appState.products.map(product => `<tr><td>${product.title}</td><td>${product.category}</td><td>$${product.price.toFixed(2)}</td><td>${product.stock}</td><td><button onclick="openProductForm('${product.id}')">Edit</button><button onclick="deleteProduct('${product.id}')" style="background: rgba(239,68,68,.16); color: #b91c1c;">Delete</button></td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function adminOrdersTemplate() {
+      return `<div class="admin-card"><h3>Customer orders</h3>${appState.orders.length ? `<table class="table"><thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${appState.orders.map(order => `<tr><td>${order.id}</td><td>${order.name}</td><td>$${order.total.toFixed(2)}</td><td>${order.status}</td><td>${new Date(order.created).toLocaleString()}</td></tr>`).join('')}</tbody></table>` : '<p style="color:var(--muted)">No orders received yet.</p>'}</div>`;
+    }
+    function adminSettingsTemplate() {
+      const settings = appState.settings;
+      return `<div class="admin-card"><h3>Store appearance and info</h3><div class="form-grid"><div class="form-row"><label>Logo text</label><input id="settingLogo" value="${settings.logoText}" /></div><div class="form-row"><label>Primary color</label><input id="settingPrimary" type="color" value="${settings.primaryColor}" /></div><div class="form-row"><label>Secondary color</label><input id="settingSecondary" type="color" value="${settings.secondaryColor}" /></div><div class="form-row" style="grid-column:1/-1"><label>Support email</label><input id="settingEmail" value="${settings.contactEmail}" /></div><div class="form-row"><label>Support phone</label><input id="settingPhone" value="${settings.contactPhone}" /></div><div class="form-row" style="grid-column:1/-1"><label>Hero text</label><textarea id="settingHero" rows="4">${settings.heroBanner}</textarea></div><button onclick="saveSettings()">Save settings</button></div></div>`;
+    }
+    function openProductForm(productId) {
+      const product = appState.products.find(item => item.id === productId) || { id:'', title:'', category:'', price:'', description:'', stock:'', image:'', rating:4.5, new:true, bestSeller:false };
+      const formHtml = `<div class="admin-card"><h3>${product.id ? 'Edit product' : 'Add product'}</h3><div class="form-grid"><div class="form-row"><label>Title</label><input id="formTitle" value="${product.title}" /></div><div class="form-row"><label>Category</label><input id="formCategory" value="${product.category}" /></div><div class="form-row"><label>Price</label><input id="formPrice" type="number" value="${product.price}" /></div><div class="form-row"><label>Stock</label><input id="formStock" type="number" value="${product.stock}" /></div><div class="form-row" style="grid-column:1/-1"><label>Description</label><textarea id="formDescription" rows="4">${product.description}</textarea></div><div class="form-row"><label>Image URL</label><input id="formImage" value="${product.image}" /></div><div class="form-row"><label>Upload image</label><input id="formImageFile" type="file" accept="image/*" onchange="previewUpload(this)" /></div><div class="form-row"><label>Rating</label><input id="formRating" type="number" min="0" max="5" step="0.1" value="${product.rating}" /></div><div class="form-row"><label>Best seller</label><select id="formBestSeller"><option value="true" ${product.bestSeller ? 'selected' : ''}>Yes</option><option value="false" ${!product.bestSeller ? 'selected' : ''}>No</option></select></div><div class="form-row"><label>New product</label><select id="formNew"><option value="true" ${product.new ? 'selected' : ''}>Yes</option><option value="false" ${!product.new ? 'selected' : ''}>No</option></select></div><button onclick="saveProduct('${product.id}')">Save product</button><button onclick="renderAdmin()" style="background:#64748b">Cancel</button></div></div>`;
+      document.getElementById('adminSections').innerHTML = formHtml;
+    }
+    function previewUpload(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => document.getElementById('formImage').value = reader.result;
+      reader.readAsDataURL(file);
+    }
+    function saveProduct(existingId) {
+      const title = document.getElementById('formTitle').value.trim();
+      const category = document.getElementById('formCategory').value.trim();
+      const price = Number(document.getElementById('formPrice').value);
+      const stock = Number(document.getElementById('formStock').value);
+      const description = document.getElementById('formDescription').value.trim();
+      const image = document.getElementById('formImage').value.trim();
+      const rating = Number(document.getElementById('formRating').value);
+      const bestSeller = document.getElementById('formBestSeller').value === 'true';
+      const isNew = document.getElementById('formNew').value === 'true';
+      if (!title || !category || !price || !stock || !description || !image) {
+        showToast('Complete all product fields');
+        return;
+      }
+      const productData = { id: existingId || `p${Date.now()}`, title, category, price, stock, description, image, rating, bestSeller, new: isNew };
+      if (existingId) {
+        const index = appState.products.findIndex(item => item.id === existingId);
+        appState.products[index] = productData;
+      } else {
+        appState.products.unshift(productData);
+      }
+      saveLocalData();
+      renderProducts();
+      renderAdmin();
+      showToast('Product saved successfully');
+    }
+    function deleteProduct(productId) {
+      appState.products = appState.products.filter(item => item.id !== productId);
+      saveLocalData();
+      renderProducts();
+      renderAdmin();
+      showToast('Product removed');
+    }
+    function saveSettings() {
+      appState.settings.logoText = document.getElementById('settingLogo').value.trim();
+      appState.settings.primaryColor = document.getElementById('settingPrimary').value;
+      appState.settings.secondaryColor = document.getElementById('settingSecondary').value;
+      appState.settings.contactEmail = document.getElementById('settingEmail').value.trim();
+      appState.settings.contactPhone = document.getElementById('settingPhone').value.trim();
+      appState.settings.heroBanner = document.getElementById('settingHero').value.trim();
+      document.documentElement.style.setProperty('--primary', appState.settings.primaryColor);
+      document.documentElement.style.setProperty('--secondary', appState.settings.secondaryColor);
+      saveLocalData();
+      renderProducts();
+      showToast('Store settings updated');
+    }
+    function sendContact() {
+      const name = document.getElementById('contactName').value.trim();
+      const email = document.getElementById('contactEmail').value.trim();
+      const message = document.getElementById('contactMessage').value.trim();
+      if (!name || !email || !message) {
+        showToast('Please fill in all contact fields');
+        return;
+      }
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactMessage').value = '';
+      showToast('Thank you! We will respond shortly');
+    }
+    function completeCheckout() {
+      const name = document.getElementById('checkoutName').value.trim();
+      const email = document.getElementById('checkoutEmail').value.trim();
+      const address = document.getElementById('checkoutAddress').value.trim();
+      const city = document.getElementById('checkoutCity').value.trim();
+      const postal = document.getElementById('checkoutPostal').value.trim();
+      if (!name || !email || !address || !city || !postal) {
+        showToast('Complete billing details to proceed');
+        return;
+      }
+      const cartItems = Object.keys(appState.cart).map(id => {
+        const product = appState.products.find(item => item.id === id);
+        return { product, qty: appState.cart[id] };
+      });
+      if (!cartItems.length) {
+        showToast('Your cart is empty');
+        return;
+      }
+      const total = cartItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+      appState.orders.unshift({ id: `ORD-${Date.now()}`, name, email, address, city, postal, total, status: 'Awaiting fulfillment', created: Date.now(), items: cartItems });
+      appState.cart = {};
+      saveLocalData();
+      renderProducts();
+      updateCartPanel();
+      showToast('Order completed successfully');
+      navigate('home');
+    }
+    function toggleTheme() {
+      const isDark = !document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('themeToggle').textContent = isDark ? 'Light mode' : 'Dark mode';
+      localStorage.setItem(STORAGE_KEYS.theme, isDark ? 'dark' : 'light');
+    }
+    function init() {
+      loadLocalData();
+      renderProducts();
+      renderAdmin();
+      updateCartPanel();
+      document.getElementById('loader').classList.add('hide');
+      setTimeout(() => document.getElementById('loader').remove(), 600);
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
